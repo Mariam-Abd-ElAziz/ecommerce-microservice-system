@@ -9,4 +9,14 @@ public class Pricing_Rule {
         this.min_quantity = min_quantity;
         this.discount_percentage = discount_percentage;
     }
+
+
+    public int get_min_quantity() {
+        return min_quantity;
+    }
+
+    public float get_discount_percentage() {
+        return discount_percentage;
+    }
+
 }
