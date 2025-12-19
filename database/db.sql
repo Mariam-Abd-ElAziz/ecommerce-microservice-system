@@ -3,6 +3,16 @@ USE ecommerce_system;
 
 -- DDL
 
+-- customer/profile management service
+CREATE TABLE customers (
+customer_id INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(100) NOT NULL,
+email VARCHAR(100) UNIQUE NOT NULL,
+phone VARCHAR(20),
+loyalty_points INT DEFAULT 0,
+created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
 -- order service
 CREATE TABLE orders (
 	order_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -10,6 +20,15 @@ CREATE TABLE orders (
     total_amount DOUBLE NOT NULL,
     
     FOREIGN KEY (customer_id) REFERENCES customers (customer_id)
+);
+
+-- inventory service
+CREATE TABLE inventory (
+product_id INT PRIMARY KEY AUTO_INCREMENT,
+product_name VARCHAR(100) NOT NULL,
+quantity_available INT NOT NULL,
+unit_price DECIMAL(10,2) NOT NULL,
+last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE orders_products (
@@ -20,15 +39,6 @@ CREATE TABLE orders_products (
     PRIMARY KEY(order_id, product_id),
     FOREIGN KEY (order_id) REFERENCES orders (order_id),
     FOREIGN KEY (product_id) REFERENCES inventory (product_id)
-);
-
--- inventory service
-CREATE TABLE inventory (
-product_id INT PRIMARY KEY AUTO_INCREMENT,
-product_name VARCHAR(100) NOT NULL,
-quantity_available INT NOT NULL,
-unit_price DECIMAL(10,2) NOT NULL,
-last_updated TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- pricing service
@@ -42,16 +52,6 @@ discount_percentage DECIMAL(5,2)
 CREATE TABLE tax_rates (
 region VARCHAR(50) PRIMARY KEY,
 tax_rate DECIMAL(5,2)
-);
-
--- customer/profile management service
-CREATE TABLE customers (
-customer_id INT PRIMARY KEY AUTO_INCREMENT,
-name VARCHAR(100) NOT NULL,
-email VARCHAR(100) UNIQUE NOT NULL,
-phone VARCHAR(20),
-loyalty_points INT DEFAULT 0,
-created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- notification service

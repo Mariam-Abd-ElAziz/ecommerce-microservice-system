@@ -8,8 +8,8 @@ app = Flask(__name__)
 try:
     db_conn = mysql.connector.connect(
         host="localhost",
-        user="ecommerce_user",
-        password="secure_password",
+        user="root",
+        password="1234",
         database="ecommerce_system"
     )
     cursor = db_conn.cursor(dictionary=True)
@@ -18,11 +18,41 @@ except Error as e:
     print(f"Error connecting to MySQL: {e}")
     exit(1)
 
+# Get all available products
+@app.route('/api/inventory/products', methods=['GET'])
+def retreive_inventory():
+    try:
+        cursor.execute("""
+            SELECT product_name, unit_price
+            FROM inventory
+            WHERE quantity_available > 0
+        """)
+
+        rows = cursor.fetchall()
+
+        products = [
+            {
+                "product_name": row[0],
+                "unit_price": row[1]
+            }
+            for row in rows
+        ]
+
+        if not products:
+            print("No available products found")
+            return jsonify({"status": "inventory_empty", "message": "all products are currently unavailable"}), 200
+        
+        print("Retrieved available products:", products)
+        return jsonify(products), 200
+    
+    except Error as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+
 # Check stock availability
 @app.route('/api/inventory/check/<int:product_id>', methods=['GET'])
 def check_inventory(product_id):
     try:
-        cursor.execute("SELECT * FROM inventory WHERE product_id=%s", (product_id,))
+        cursor.execute("SELECT * FROM inventory WHERE product_id=%s", (product_id, ))
         product = cursor.fetchone()
         if not product:
             return jsonify({"status": "error", "message": "Product not found"}), 404

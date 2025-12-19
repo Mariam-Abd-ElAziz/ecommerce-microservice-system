@@ -1,5 +1,12 @@
 package com.ecommerce.ecommercefrontend.servlets;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
+
 import com.ecommerce.ecommercefrontend.models.Product;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,18 +17,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.List;
-
 @WebServlet("/products")
 public class ProductServlet extends HttpServlet {
 
     // to be adjusted based on actual Flask service location
-    private static final String INVENTORY_SERVICE_URL = "http://localhost:5002/api/inventory";
+    private static final String INVENTORY_SERVICE_URL = "http://localhost:5002/api/inventory/products";
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -38,9 +38,13 @@ public class ProductServlet extends HttpServlet {
                     .GET()
                     .build();
 
+            System.out.println("Done 1");
+
             // 2. Call Flask service
             HttpResponse<String> inventoryFlaskResponse =
                     httpClient.send(inventoryFlaskRequest, HttpResponse.BodyHandlers.ofString());
+
+            System.out.println(inventoryFlaskResponse.body());
 
             // 3. Parse JSON into a list of Product objects
             List<Product> products = objectMapper.readValue(
@@ -48,11 +52,15 @@ public class ProductServlet extends HttpServlet {
                     new TypeReference<List<Product>>() {}
             );
 
+            System.out.println(products);
+
             // 4. Pass data to JSP
             request.setAttribute("products", products);
 
+            System.out.println("attribute set");
+
             // 5. Forward to JSP (hidden from direct access)
-            request.getRequestDispatcher("/WEB-INF/index.jsp")
+            request.getRequestDispatcher("index.jsp")
                    .forward(request, response);
 
         } catch (InterruptedException e) {

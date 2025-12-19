@@ -28,17 +28,6 @@
                 <div class="product">
                     <h2><%= p.get_product_name() %></h2>
                     <p class="product-price">$<%= p.get_unit_price() %></p>
-                    <p><%= p.get_is_available()? "available" : "not available" %></p>
-                    <%
-                        List<Pricing_Rule> pricingRules = p.get_pricing_rules();
-                        if (pricingRules != null) {
-                            for (Pricing_Rule rule : pricingRules) {
-                    %>
-                                <p>Pricing Rule: if you buy <%= rule.get_min_quantity() %> or more you will get a <%= rule.get_discount_percentage()%>% discount!</p>
-                    <%
-                            }
-                        }
-                    %>
                 </div>
     <%
             }
