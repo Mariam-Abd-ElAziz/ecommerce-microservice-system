@@ -26,11 +26,31 @@ public class OrderServlet extends HttpServlet {
 
         // Get form parameters
         String customerId = request.getParameter("customer_id");
-        String productId = request.getParameter("product_id");
-        String quantity = request.getParameter("quantity");
+        String[] productIds = request.getParameterValues("product_id");
+        String[] quantities = request.getParameterValues("quantity");
 
-        // Build JSON payload
-        String jsonPayload = String.format( "{\"customer_id\":%s,\"products\":[{\"product_id\":%s,\"quantity\":%s}]}", customerId, productId, quantity );
+        if (customerId == null || productIds == null || quantities == null) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing required fields");
+            return;
+        }
+
+        // Build products array from parallel parameter arrays; ignore empty rows
+        StringBuilder productsJson = new StringBuilder();
+        productsJson.append("[");
+        boolean first = true;
+        int len = Math.min(productIds.length, quantities.length);
+        for (int i = 0; i < len; i++) {
+            String pid = productIds[i];
+            String qty = quantities[i];
+            if (pid == null || pid.trim().isEmpty()) continue;
+            if (qty == null || qty.trim().isEmpty()) continue;
+            if (!first) productsJson.append(",");
+            productsJson.append(String.format("{\"product_id\":%s,\"quantity\":%s}", pid.trim(), qty.trim()));
+            first = false;
+        }
+        productsJson.append("]");
+
+        String jsonPayload = String.format("{\"customer_id\":%s,\"products\":%s}", customerId, productsJson.toString());
         
         // Build request to Flask service
         HttpRequest orderFlaskRequest = HttpRequest.newBuilder()
@@ -44,7 +64,7 @@ public class OrderServlet extends HttpServlet {
             HttpResponse<String> orderFlaskResponse =
             httpClient.send(orderFlaskRequest, HttpResponse.BodyHandlers.ofString());
             
-            // Forward to confirmation page
+            // Forward to confirmation page with server-side order response
             request.setAttribute("orderResponse", orderFlaskResponse.body());
             request.getRequestDispatcher("confirmation.jsp").forward(request, response);
         
