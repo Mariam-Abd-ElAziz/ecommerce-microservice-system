@@ -30,20 +30,12 @@ def retreive_inventory():
 
         rows = cursor.fetchall()
 
-        products = [
-            {
-                "product_name": row[0],
-                "unit_price": row[1]
-            }
-            for row in rows
-        ]
-
-        if not products:
+        if not rows:
             print("No available products found")
             return jsonify({"status": "inventory_empty", "message": "all products are currently unavailable"}), 200
         
-        print("Retrieved available products:", products)
-        return jsonify(products), 200
+        print("Retrieved available products:", rows)
+        return jsonify(rows), 200
     
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500

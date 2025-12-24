@@ -25,7 +25,6 @@ public class ProductServlet extends HttpServlet {
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -38,13 +37,9 @@ public class ProductServlet extends HttpServlet {
                     .GET()
                     .build();
 
-            System.out.println("Done 1");
-
             // 2. Call Flask service
             HttpResponse<String> inventoryFlaskResponse =
                     httpClient.send(inventoryFlaskRequest, HttpResponse.BodyHandlers.ofString());
-
-            System.out.println(inventoryFlaskResponse.body());
 
             // 3. Parse JSON into a list of Product objects
             List<Product> products = objectMapper.readValue(
@@ -52,16 +47,12 @@ public class ProductServlet extends HttpServlet {
                     new TypeReference<List<Product>>() {}
             );
 
-            System.out.println(products);
-
             // 4. Pass data to JSP
             request.setAttribute("products", products);
 
-            System.out.println("attribute set");
-
             // 5. Forward to JSP (hidden from direct access)
-            request.getRequestDispatcher("index.jsp")
-                   .forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/index.jsp")
+                .forward(request, response);
 
         } catch (InterruptedException e) {
             // Thread.currentThread().interrupt();
