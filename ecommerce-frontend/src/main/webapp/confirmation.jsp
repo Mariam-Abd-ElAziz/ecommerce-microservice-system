@@ -16,10 +16,10 @@
     <div class="box">
         <h3>Order response (server)</h3>
         <%
-            Object respObj = request.getAttribute("orderResponse");
-            if (respObj != null) {
+            Integer statusCode = (Integer) session.getAttribute("statusCode");
+            if (statusCode == 201) {
         %>
-            <pre><%= respObj.toString() %></pre>
+            <pre> your order has successfully been placed! </pre>
         <%
             } else {
         %>

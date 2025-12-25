@@ -9,8 +9,8 @@ app = Flask(__name__)
 try:
     db_conn = mysql.connector.connect(
         host="localhost",
-        user="ecommerce_user",
-        password="secure_password",
+        user="root",
+        password="1234",
         database="ecommerce_system"
     )
     cursor = db_conn.cursor(dictionary=True)
@@ -25,7 +25,18 @@ def create_order():
         data = request.get_json()
         customer_id = data['customer_id']
         products = data['products']
-        total_amount = data['total_amount']
+
+        # Calculate total amount
+        total_amount = 0
+        for p in products:
+            try:
+                inventory_response = requests.get(
+                    "http://localhost:5002/api/inventory/price/" + str(p['product_id']),
+                )
+                unit_price = float(inventory_response.json()["unit_price"])
+                total_amount += unit_price * p['quantity']
+            except Exception as inv_err:
+                print(f"failed to retreive the price: {type(inv_err).__name__}: {inv_err}")
 
         # Insert order
         cursor.execute(

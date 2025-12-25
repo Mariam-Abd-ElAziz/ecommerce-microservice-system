@@ -19,6 +19,15 @@ public class OrderServlet extends HttpServlet {
     private static final String ORDER_SERVICE_URL = "http://localhost:5001/api/orders/create";
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+
+        // Show checkout page
+        request.getRequestDispatcher("/WEB-INF/checkout.jsp")
+            .forward(request, response);
+    }
     
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -64,9 +73,11 @@ public class OrderServlet extends HttpServlet {
             HttpResponse<String> orderFlaskResponse =
             httpClient.send(orderFlaskRequest, HttpResponse.BodyHandlers.ofString());
             
-            // Forward to confirmation page with server-side order response
-            request.setAttribute("orderResponse", orderFlaskResponse.body());
-            request.getRequestDispatcher("confirmation.jsp").forward(request, response);
+            // Store in SESSION before redirecting
+            request.getSession().setAttribute("statusCode", orderFlaskResponse.statusCode());
+            
+            // Then redirect
+            response.sendRedirect("confirmation.jsp");
         
         } catch (InterruptedException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);

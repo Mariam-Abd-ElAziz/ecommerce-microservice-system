@@ -40,6 +40,18 @@ def retreive_inventory():
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
+# retrieve a product's price
+@app.route('/api/inventory/price/<int:product_id>', methods=['GET'])
+def get_product_price(product_id):
+    try:
+        cursor.execute("SELECT unit_price FROM inventory WHERE product_id=%s", (product_id, ))
+        price = cursor.fetchone()
+        if not price:
+            return jsonify({"status": "error", "message": "Product not found"}), 404
+        return jsonify({"unit_price": price["unit_price"]}), 200
+    except Error as e:
+        return jsonify({"status": "error", "message": str(e)}), 500
+    
 # Check stock availability
 @app.route('/api/inventory/check/<int:product_id>', methods=['GET'])
 def check_inventory(product_id):

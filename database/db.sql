@@ -92,7 +92,7 @@ INSERT INTO pricing_rules (product_id, min_quantity, discount_percentage) VALUES
 
 
 -- DB user with limited privileges
-CREATE USER 'ecommerce_user'@'localhost' IDENTIFIED BY 'secure_password';
+CREATE USER IF NOT EXISTS 'ecommerce_user'@'localhost' IDENTIFIED BY 'secure_password';
 GRANT SELECT, INSERT, UPDATE ON ecommerce_system.* TO 'ecommerce_user'@'localhost';
 FLUSH PRIVILEGES;
 
