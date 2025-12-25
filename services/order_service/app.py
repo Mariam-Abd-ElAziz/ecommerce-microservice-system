@@ -4,20 +4,6 @@ import requests  # to call Inventory Service
 from db import get_db_connection
 app = Flask(__name__)
 
-# Connect to MySQL
-try:
-    db_conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="1234",
-        database="ecommerce_system"
-    )
-    cursor = db_conn.cursor(dictionary=True)
-    print("Connected to MySQL database")
-except Error as e:
-    print(f"Error connecting to MySQL: {e}")
-    exit(1)
-
 @app.route('/api/orders/create', methods=['POST'])
 def create_order():
     db_conn = get_db_connection()

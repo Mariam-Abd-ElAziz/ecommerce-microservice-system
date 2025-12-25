@@ -14,7 +14,7 @@ def retreive_inventory():
     cursor=conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT product_name, unit_price , quantity_available 
+            SELECT product_name, unit_price
             FROM inventory
             WHERE quantity_available > 0
         """)
@@ -23,9 +23,8 @@ def retreive_inventory():
 
         products = [
         {
-        "product_name": row["product_name"],
-        "unit_price": float(row["unit_price"]) ,
-        "quantity_available": row["quantity_available"]
+            "product_name": row["product_name"],
+            "unit_price": float(row["unit_price"]) ,
         }
         for row in rows
         ]
@@ -46,6 +45,8 @@ def retreive_inventory():
 # retrieve a product's price
 @app.route('/api/inventory/price/<int:product_id>', methods=['GET'])
 def get_product_price(product_id):
+    conn=get_db_connection()
+    cursor=conn.cursor(dictionary=True)
     try:
         cursor.execute("SELECT unit_price FROM inventory WHERE product_id=%s", (product_id, ))
         price = cursor.fetchone()
