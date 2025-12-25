@@ -34,8 +34,8 @@ def retreive_inventory():
             print("No available products found")
             return jsonify({"status": "inventory_empty", "message": "all products are currently unavailable"}), 200
         
-        print("Retrieved available products:", products)
-        return jsonify(products), 200
+        print("Retrieved available products:", rows)
+        return jsonify(rows), 200
     
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
