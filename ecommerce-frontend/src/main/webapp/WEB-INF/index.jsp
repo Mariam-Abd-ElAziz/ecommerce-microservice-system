@@ -14,10 +14,31 @@
             .product h2 { margin: 0 0 10px; font-size: 1.2em; }
             .product p { margin: 5px 0; }
             .product-price { font-weight: bold; color: green; }
+
+            .profile-btn {
+                display: inline-block;
+                padding: 10px 18px;
+                background: #4a6cf7;
+                color: white;
+                text-decoration: none;
+                border-radius: 10px;
+                font-size: 15px;
+                font-weight: 600;
+                transition: 0.25s ease;
+            }
+
+            .profile-btn:hover {
+                background: #354ed8;
+                transform: translateY(-2px);
+            }
         </style>
     </head>
     <body>
         <h1>Product Catalog</h1>
+
+        <a href="${pageContext.request.contextPath}/profile.jsp" class="profile-btn">View Profile</a>
+
+        <br/><br/>
 
         <%
             // Retrieve the products list from request attributes

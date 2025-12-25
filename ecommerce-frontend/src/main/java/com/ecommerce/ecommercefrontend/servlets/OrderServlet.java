@@ -77,7 +77,7 @@ public class OrderServlet extends HttpServlet {
             request.getSession().setAttribute("statusCode", orderFlaskResponse.statusCode());
             
             // Then redirect
-            response.sendRedirect("confirmation.jsp");
+            response.sendRedirect("/WEB-INF/confirmation.jsp");
         
         } catch (InterruptedException e) {
             response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
