@@ -1,8 +1,7 @@
 from flask import Flask, request, jsonify
-import mysql.connector
 from mysql.connector import Error
 import requests  # to call Inventory Service
-
+from db import get_db_connection
 app = Flask(__name__)
 
 # Connect to MySQL
@@ -21,10 +20,19 @@ except Error as e:
 
 @app.route('/api/orders/create', methods=['POST'])
 def create_order():
+    db_conn = get_db_connection()
+    cursor = db_conn.cursor(dictionary=True)
     try:
         data = request.get_json()
+        if not data:
+            return jsonify({"error": "Invalid JSON"}), 400
+        
         customer_id = data['customer_id']
         products = data['products']
+
+        if not customer_id or not products:
+            return jsonify({"error": "Missing required fields (customer ID or no selected products)"}), 400
+
 
         # Calculate total amount
         total_amount = 0
@@ -48,6 +56,8 @@ def create_order():
 
         # Insert products for the order
         for p in products:
+            if p['quantity'] <= 0:
+                return jsonify({"error": "Quantity must be > 0"}), 400
             cursor.execute(
                 "INSERT INTO orders_products (order_id, product_id, quantity) VALUES (%s, %s, %s)",
                 (order_id, p['product_id'], p['quantity'])
@@ -64,10 +74,70 @@ def create_order():
         except Exception as inv_err:
             print(f"Failed to update inventory: {inv_err}")
 
+        #Automatically update customer loyalty points
+        try:
+            requests.put(
+                f"http://localhost:5004/api/customers/{customer_id}/loyalty",
+                json={"points": 10},
+                timeout=3
+            )
+        except Exception as e:
+            print("Loyalty update failed:", e)
+
+        #Automatically send notification
+
+        try:
+            requests.post(
+                "http://localhost:5005/api/notifications/send",
+                json={
+                    "order_id": order_id,
+                    "customer_id": customer_id
+                },
+                timeout=3
+            )
+        except Exception as e:
+            print("Notification failed:", e)
+
+
         return jsonify({"order_id": order_id, "status": "success"}), 201
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
 
-if __name__ == "__main__":
+@app.route('/api/orders/<int:order_id>', methods=['GET'])
+def get_order(order_id):
+    db_conn = get_db_connection()
+    cursor = db_conn.cursor(dictionary=True)
+
+    try:
+        # Fetch order details
+        cursor.execute(
+            "SELECT * FROM orders WHERE order_id = %s",
+            (order_id,)
+        )
+        order = cursor.fetchone()
+
+        if not order:
+            return jsonify({"error": "Order not found"}), 404
+
+        # Fetch products for this order
+        cursor.execute(
+            "SELECT product_id, quantity FROM orders_products WHERE order_id = %s",
+            (order_id,)
+        )
+        products = cursor.fetchall()
+
+        return jsonify({
+            "order": order,
+            "products": products
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
+        cursor.close()
+        db_conn.close()
+if __name__ == '__main__':
     app.run(port=5001, debug=True)
+    
