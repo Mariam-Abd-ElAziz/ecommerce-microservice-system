@@ -1,6 +1,6 @@
 # Order Service
 
-Simple Flask-based Order Service for the ecommerce-project microservices demo.
+Flask-based Order Service for the ecommerce-project microservices demo.
 
 **What it does:**
 - Receives order creation requests and persists orders to MySQL.
@@ -19,14 +19,7 @@ pip install -r requirements.txt
 ```
 
 ## Configuration
-By default `db.py` contains connection settings for a local MySQL instance:
-
-- host: `localhost`
-- user: `ecommerce_user`
-- password: `secure_password`
-- database: `ecommerce_system`
-
-Update `db.py` or replace with environment-based configuration before production use.
+`db.py` contains default local MySQL connection settings; move credentials to environment variables before production.
 
 ## Run
 Start the service (development):
@@ -35,7 +28,7 @@ Start the service (development):
 python app.py
 ```
 
-The service runs on port `5001` by default.
+Runs on port `5001` by default.
 
 ## Endpoints
 - `GET /` — health check
@@ -53,5 +46,5 @@ Example `POST /api/orders/create` payload:
 ```
 
 ## Notes
-- The service calls other local services for inventory, loyalty, and notifications at ports `5002`, `5004`, and `5005` respectively — ensure those services are running or adjust the URLs.
-- For production, move DB credentials to environment variables and add retries/timeouts around inter-service requests.
+- The service calls other local services for inventory, loyalty, and notifications at ports `5002`, `5004`, and `5005` — ensure those services are running or update the URLs.
+- For production, secure DB credentials, add retries/timeouts and better error handling, and consider using a message queue for durable inter-service communication.

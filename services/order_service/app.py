@@ -85,31 +85,36 @@ def create_order():
 def get_order(order_id):
     db_conn = get_db_connection()
     cursor = db_conn.cursor(dictionary=True)
-    cursor.execute(
-    "SELECT * FROM orders WHERE order_id = %s",
-    (order_id,)
-    )
-    order = cursor.fetchone()
 
-    if not order:
+    try:
+        # Fetch order details
+        cursor.execute(
+            "SELECT * FROM orders WHERE order_id = %s",
+            (order_id,)
+        )
+        order = cursor.fetchone()
+
+        if not order:
+            return jsonify({"error": "Order not found"}), 404
+
+        # Fetch products for this order
+        cursor.execute(
+            "SELECT product_id, quantity FROM orders_products WHERE order_id = %s",
+            (order_id,)
+        )
+        products = cursor.fetchall()
+
+        return jsonify({
+            "order": order,
+            "products": products
+        }), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    finally:
         cursor.close()
         db_conn.close()
-        return jsonify({"error": "Order not found"}), 404
-    
-    cursor.execute(
-        "SELECT product_id, quantity FROM orders_products WHERE order_id = %s",
-        (order_id,)
-    )
-    products = cursor.fetchall()
-
-    cursor.close()
-    db_conn.close()
-
-    return jsonify({
-        "order": order,
-        "products": products
-    }), 200
-
 if __name__ == '__main__':
     app.run(port=5001, debug=True)
-                    
+    
