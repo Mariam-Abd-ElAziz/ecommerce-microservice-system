@@ -1,29 +1,20 @@
 from flask import Flask, request, jsonify
-import mysql.connector
 from mysql.connector import Error
-
+from db import get_db_connection
 app = Flask(__name__)
 
-# Connect to MySQL
-try:
-    db_conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="1234",
-        database="ecommerce_system"
-    )
-    cursor = db_conn.cursor(dictionary=True)
-    print("Connected to MySQL database")
-except Error as e:
-    print(f"Error connecting to MySQL: {e}")
-    exit(1)
+@app.route('/')
+def home():
+    return "Inventory service is running!"
 
 # Get all available products
 @app.route('/api/inventory/products', methods=['GET'])
 def retreive_inventory():
+    conn=get_db_connection()
+    cursor=conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT product_name, unit_price
+            SELECT product_name, unit_price , quantity_available 
             FROM inventory
             WHERE quantity_available > 0
         """)
@@ -31,11 +22,12 @@ def retreive_inventory():
         rows = cursor.fetchall()
 
         products = [
-            {
-                "product_name": row[0],
-                "unit_price": row[1]
-            }
-            for row in rows
+        {
+        "product_name": row["product_name"],
+        "unit_price": float(row["unit_price"]) ,
+        "quantity_available": row["quantity_available"]
+        }
+        for row in rows
         ]
 
         if not products:
@@ -47,10 +39,15 @@ def retreive_inventory():
     
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # Check stock availability
 @app.route('/api/inventory/check/<int:product_id>', methods=['GET'])
 def check_inventory(product_id):
+    conn=get_db_connection()
+    cursor=conn.cursor(dictionary=True)
     try:
         cursor.execute("SELECT * FROM inventory WHERE product_id=%s", (product_id, ))
         product = cursor.fetchone()
@@ -59,6 +56,9 @@ def check_inventory(product_id):
         return jsonify(product), 200
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 # Update inventory automatically
 @app.route('/api/inventory/update', methods=['POST'])
@@ -73,6 +73,8 @@ def update_inventory():
         ]
     }
     """
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
     try:
         data = request.get_json()
         products = data.get("products")
@@ -119,11 +121,14 @@ def update_inventory():
                 "status": "success"
             })
 
-        db_conn.commit()
+        conn.commit()
         return jsonify({"status": "completed", "updated_products": updated_products}), 200
 
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 if __name__ == "__main__":
     app.run(port=5002, debug=True)
