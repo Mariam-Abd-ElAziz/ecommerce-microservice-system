@@ -55,12 +55,18 @@
 
 <!-- REQUIRED LINKS -->
 <div class="top-links">
-    <a href="${pageContext.request.contextPath}/profile">View Profile</a>
-    <a href="${pageContext.request.contextPath}/orders">Orders History</a>
+    <a href="${pageContext.request.contextPath}/customerProfile?customer_id=1">
+        View Profile
+    </a>
+
+    <a href="${pageContext.request.contextPath}/ordersHistory?customer_id=2">
+        View Orders History
+    </a>
+
 </div>
 
 <!-- FORM STARTS SCENARIO-1 -->
-<form action="${pageContext.request.contextPath}/checkout" method="post">
+<form action="${pageContext.request.contextPath}/checkout.jsp" method="post">
 
     <%
         List<Product> products = (List<Product>) request.getAttribute("products");

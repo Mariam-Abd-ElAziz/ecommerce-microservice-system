@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="soa">
+    <output-path>$PROJECT_DIR$/out/artifacts/soa</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="ecommerce-frontend" />
+        </element>
+      </element>
+      <element id="artifact" artifact-name="ecommerce-frontend:war exploded" />
+      <element id="artifact" artifact-name="ecommerce-frontend:war" />
+    </root>
+  </artifact>
+</component>

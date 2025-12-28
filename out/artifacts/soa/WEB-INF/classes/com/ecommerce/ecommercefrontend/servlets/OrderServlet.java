@@ -6,8 +6,6 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -98,16 +96,8 @@ public class OrderServlet extends HttpServlet {
             }
 
             // Success: store order info in session and redirect to confirmation
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode rootNode = mapper.readTree(responseBody);
-
-            request.getSession().setAttribute("order_id", rootNode.get("order_id").asInt());
-            request.getSession().setAttribute("total_amount", rootNode.get("total_amount").asDouble());
-            request.getSession().setAttribute("items", rootNode.get("items")); // optional
-            request.getSession().setAttribute("customer_id", customerId);
-
+            request.getSession().setAttribute("orderResponse", responseBody);
             response.sendRedirect("confirmation.jsp");
-
             request.getSession().setAttribute("statusCode", orderFlaskResponse.statusCode());
 
         } catch (InterruptedException e) {

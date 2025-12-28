@@ -14,9 +14,8 @@ def retreive_inventory():
     cursor=conn.cursor(dictionary=True)
     try:
         cursor.execute("""
-            SELECT product_name, unit_price
+            SELECT product_name, unit_price, quantity_available
             FROM inventory
-            WHERE quantity_available > 0
         """)
 
         rows = cursor.fetchall()
@@ -25,6 +24,7 @@ def retreive_inventory():
         {
             "product_name": row["product_name"],
             "unit_price": float(row["unit_price"]) ,
+            "quantity_available": row["quantity_available"]
         }
         for row in rows
         ]
@@ -34,7 +34,7 @@ def retreive_inventory():
             return jsonify({"status": "inventory_empty", "message": "all products are currently unavailable"}), 200
         
         print("Retrieved available products:", rows)
-        return jsonify(rows), 200
+        return jsonify(products), 200
     
     except Error as e:
         return jsonify({"status": "error", "message": str(e)}), 500
